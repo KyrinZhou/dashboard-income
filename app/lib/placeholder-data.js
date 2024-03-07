@@ -187,10 +187,21 @@ const revenue = [
   { month: 'Nov', revenue: 3000 },
   { month: 'Dec', revenue: 4800 },
 ];
-
+const dashboard_data = [
+  {
+    user_id: '410544b2-4001-4271-9855-fec4b6a6442a',
+    ad_request_pv: 12324,
+    exposure_pv: 2131,
+    click_pv: 1234,
+    total_income: 27364.22,
+    share_ratio: 0.6,
+    sub_share_ratio: 0.15,
+  },
+];
 module.exports = {
   users,
   customers,
   invoices,
   revenue,
+  dashboard_data,
 };

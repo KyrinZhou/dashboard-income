@@ -87,3 +87,15 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+export type DashBoardType = {
+  ad_request_pv: number;
+  exposure_pv: number;
+  click_pv: number;
+  click_rate: number;
+  ecpm: number;
+  income: number;
+  total_income: number;
+  share_ratio: number;
+  sub_share_ratio: number;
+};

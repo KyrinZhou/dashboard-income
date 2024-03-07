@@ -4,6 +4,7 @@ const {
   customers,
   revenue,
   users,
+  dashboard_data,
 } = require('../app/lib/placeholder-data.js');
 const bcrypt = require('bcrypt');
 
@@ -11,6 +12,7 @@ async function seedUsers(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
     // Create the "users" table if it doesn't exist
+
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS users (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -47,7 +49,50 @@ async function seedUsers(client) {
     throw error;
   }
 }
+async function seedData(client) {
+  try {
+    //只有在数据表不存在时才创建
+    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+    const createTable = await client.sql`
+    CREATE TABLE IF NOT EXISTS dashboard (
+    user_id UUID PRIMARY KEY,
+    click_pv INT,
+    ad_request_pv INT,
+    share_ratio FLOAT,
+    sub_share_ratio FLOAT,
+    exposure_pv INT,
+    total_income DECIMAL(10, 2),
+    income DECIMAL(10, 2),
+    click_rate FLOAT,
+    ecpm FLOAT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    `;
+    console.log('创建数据表');
 
+    const insertedData = await Promise.all(
+      dashboard_data.map(async (item) => {
+        const income = item.total_income * item.share_ratio;
+        const ecpm = (income / item.exposure_pv) * 1000;
+        const click_rate = item.click_pv / item.exposure_pv;
+        return client.sql`
+        INSERT INTO dashboard (user_id,click_pv,ad_request_pv,share_ratio,sub_share_ratio,exposure_pv,total_income,income,click_rate,ecpm)
+        VALUES (${item.user_id},${item.click_pv},${item.ad_request_pv},${item.share_ratio},${item.sub_share_ratio},${item.exposure_pv},${item.total_income},${income},${click_rate},${ecpm})
+        ON CONFLICT (user_id) DO NOTHING;
+        `;
+      }),
+    );
+
+    console.log(`增加 ${insertedData.length} 条数据`);
+    return {
+      createTable,
+      dashboard: insertedData,
+    };
+  } catch (error) {
+    console.error('Error seeding dashboard:', error);
+    throw error;
+  }
+}
 // async function seedInvoices(client) {
 //   try {
 //     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -166,6 +211,7 @@ async function main() {
   const client = await db.connect();
 
   await seedUsers(client);
+  await seedData(client);
   // await seedCustomers(client);
   // await seedInvoices(client);
   // await seedRevenue(client);
