@@ -5,6 +5,9 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
+  session: {
+    strategy: 'jwt',
+  },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
@@ -17,6 +20,14 @@ export const authConfig = {
       }
       return true;
     },
+    session: async ({ session, token }) => {
+      console.log(session, token);
+      if (session.user && token?.sub) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
   },
+
   providers: [Credentials({})], // Add providers with an empty array for now
 } satisfies NextAuthConfig;

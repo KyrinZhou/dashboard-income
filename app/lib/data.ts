@@ -221,9 +221,9 @@ export async function fetchFilteredCustomers(query: string) {
   }
 }
 
-export async function getUser(username: string) {
+export async function getUser(id: string | undefined) {
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${username}`;
+    const user = await sql`SELECT * FROM users WHERE id=${id}`;
     return user.rows[0] as User;
   } catch (error) {
     console.error('Failed to fetch user:', error);
@@ -231,7 +231,7 @@ export async function getUser(username: string) {
   }
 }
 
-export async function getData(user_id: string) {
+export async function getData(user_id: string | undefined) {
   try {
     const data = await sql`SELECT * FROM dashboard WHERE user_id=${user_id}`;
     return data.rows[0] as DashBoardType;
