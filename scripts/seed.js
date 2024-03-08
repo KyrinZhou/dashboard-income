@@ -55,7 +55,8 @@ async function seedData(client) {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
     const createTable = await client.sql`
     CREATE TABLE IF NOT EXISTS dashboard (
-    user_id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY,
+    user_id UUID,
     click_pv INT,
     ad_request_pv INT,
     share_ratio FLOAT,
@@ -78,7 +79,7 @@ async function seedData(client) {
         return client.sql`
         INSERT INTO dashboard (user_id,click_pv,ad_request_pv,share_ratio,sub_share_ratio,exposure_pv,total_income,income,click_rate,ecpm)
         VALUES (${item.user_id},${item.click_pv},${item.ad_request_pv},${item.share_ratio},${item.sub_share_ratio},${item.exposure_pv},${item.total_income},${income},${click_rate},${ecpm})
-        ON CONFLICT (user_id) DO NOTHING;
+        ON CONFLICT (id) DO NOTHING;
         `;
       }),
     );

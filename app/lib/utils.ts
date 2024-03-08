@@ -67,3 +67,29 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     totalPages,
   ];
 };
+
+export const toStrFormat = (val: number | string, precision?: number) => {
+  if (precision === undefined || precision === null) {
+    precision = 2;
+  }
+  val =
+    Math.round(Number(val) * Math.pow(10, precision)) / Math.pow(10, precision);
+  if (typeof val === 'number') {
+    val = val.toString();
+  }
+
+  let parts = val.split('.');
+  let intPart = parts[0];
+  let decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return intPart + decimalPart;
+};
+
+export const toPercent = (val: number, precision?: number) => {
+  if (precision === undefined || precision === null) {
+    precision = 2;
+  }
+  val =
+    Math.round(val * 100 * Math.pow(10, precision)) / Math.pow(10, precision);
+  return val + '%';
+};
