@@ -16,6 +16,26 @@ async function getUser(username: string): Promise<User | undefined> {
     throw new Error('Failed to fetch user.');
   }
 }
+async function setUser(formData: {
+  username: string;
+  password: string;
+}): Promise<string | undefined> {
+  const { username, password } = formData;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    const user =
+      await sql<User>`SElECT * FROM users WHERE username=${username}`;
+    if (user.rows.length) {
+      return '当前用户名已存在';
+    }
+    await sql`INSERT INTO users (username,password)
+    VALUES (${username},${hashedPassword})
+    ON CONFLICT (id) DO NOTHING`;
+  } catch (error) {
+    console.error('Failed to create user:', error);
+  }
+}
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -23,9 +43,8 @@ export const { auth, signIn, signOut } = NextAuth({
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = z
-          .object({ username: z.string().min(0), password: z.string().min(6) })
+          .object({ username: z.string().min(1), password: z.string().min(6) })
           .safeParse(credentials);
-
         if (parsedCredentials.success) {
           const { username, password } = parsedCredentials.data;
           const user = await getUser(username);
@@ -40,3 +59,15 @@ export const { auth, signIn, signOut } = NextAuth({
     }),
   ],
 });
+
+export const registerIn = async (formData: FormData) => {
+  const parsedCredentials = z
+    .object({ username: z.string().min(0), password: z.string().min(6) })
+    .safeParse(Object.fromEntries(formData));
+
+  if (parsedCredentials.success) {
+    const res = await setUser(parsedCredentials.data);
+    console.log(res);
+    return res;
+  }
+};

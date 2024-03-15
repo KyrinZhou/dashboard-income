@@ -5,6 +5,9 @@ import {
   InboxIcon,
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
+import { auth } from '@/auth';
+import { getData } from '@/app/lib/data';
+import { toPercent, toStrFormat } from '@/app/lib/utils';
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -14,18 +17,48 @@ const iconMap = {
 };
 
 export default async function CardWrapper() {
+  const session = await auth();
+  console.log(session?.user);
+  const data = await getData(session?.user?.id);
   return (
     <>
       {/* NOTE: comment in this code when you get to this point in the course */}
 
-      {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
-      <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
       <Card
-        title="Total Customers"
-        value={numberOfCustomers}
+        title="广告请求PV"
+        value={toStrFormat(data?.ad_request_pv || 0)}
+        type="collected"
+      />
+      <Card
+        title="曝光PV"
+        value={toStrFormat(data?.exposure_pv || 0)}
+        type="pending"
+      />
+      <Card
+        title="点击PV"
+        value={toStrFormat(data?.click_pv || 0)}
+        type="invoices"
+      />
+      <Card
+        title="点击率"
+        value={toPercent(data?.click_rate || 0, 4)}
         type="customers"
-      /> */}
+      />
+      <Card
+        title="ECPM"
+        value={toStrFormat(data?.ecpm || 0, 1)}
+        type="customers"
+      />
+      <Card
+        title="广告收入"
+        value={toStrFormat(data?.income || 0)}
+        type="customers"
+      />
+      <Card
+        title="分销收入"
+        value={toStrFormat(data?.total_income || 0)}
+        type="customers"
+      />
     </>
   );
 }
